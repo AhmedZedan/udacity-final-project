@@ -203,16 +203,22 @@ jobs:
       - checkout 
       - install_terraform
       - run:
+          name: Set up Google Service Account key
+          command: |
+            mkdir -p /tmp/workspace
+            echo $GOOGLE_CREDENTIALS > /tmp/workspace/service-account-key.json
+            export GOOGLE_APPLICATION_CREDENTIALS=/tmp/workspace/service-account-key.json
+      - run:
           name: Ensure back-end infrastructure exists
           command: |
             terraform -chdir=.circleci/files/back-end init
-            terraform -chdir=.circleci/files/back-end apply -var="google_credentials=$GOOGLE_CREDENTIALS" -auto-approve
+            terraform -chdir=.circleci/files/back-end apply -auto-approve
 
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             terraform -chdir=.circleci/files/front-end init
-            terraform -chdir=.circleci/files/front-end apply -var="google_credentials=$GOOGLE_CREDENTIALS" -var="ID=${CIRCLE_WORKFLOW_ID:0:5}" -auto-approve 
+            terraform -chdir=.circleci/files/front-end apply -var="ID=${CIRCLE_WORKFLOW_ID:0:5}" -auto-approve 
       - run:
           name: Add back-end ip to ansible inventory
           command: |

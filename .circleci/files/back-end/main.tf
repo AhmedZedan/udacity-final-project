@@ -1,10 +1,10 @@
-variable "google_credentials" {
-  description = "Google Cloud Platform credentials in JSON format"
-  type        = string
-}
+# variable "google_credentials" {
+#   description = "Google Cloud Platform credentials in JSON format"
+#   type        = string
+# }
 
 provider "google" {
-  credentials = jsondecode(var.google_credentials)
+  credentials = jsondecode("/tmp/workspace/service-account-key.json")
   project     = "carbon-poet-377100"
   region      = "us-central1"
 }
