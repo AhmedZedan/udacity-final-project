@@ -4,7 +4,7 @@
 # }
 
 provider "google" {
-  credentials = jsondecode(file("/tmp/workspace/service-account-key.json"))
+  credentials = file("/tmp/workspace/service-account-key.json")
   project     = "carbon-poet-377100"
   region      = "us-central1"
 }
