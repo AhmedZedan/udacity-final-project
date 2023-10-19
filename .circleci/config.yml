@@ -240,6 +240,7 @@ jobs:
           name: Install gcloud SDK
           command: |
             # Download and install Google Cloud SDK
+            export CLOUDSDK_CORE_DISABLE_PROMPTS=1
             curl -fsSL https://sdk.cloud.google.com | bash
             exec -l $SHELL  # Restart the shell to enable gcloud
             gcloud version  # Check gcloud version
