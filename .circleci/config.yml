@@ -240,18 +240,21 @@ jobs:
           name: Install gcloud SDK
           command: |
             # Download and install Google Cloud SDK
-            export CLOUDSDK_CORE_DISABLE_PROMPTS=1
-            curl -fsSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-360.0.0-linux-x86_64.tar.gz | tar -zx
-            ./google-cloud-sdk/install.sh
-            source $HOME/google-cloud-sdk/path.bash.inc
+            curl -fsSL https://sdk.cloud.google.com | bash
+            exec -l $SHELL  # Restart the shell to enable gcloud
+            gcloud version  # Check gcloud version
 
-            # Authenticate using a service account key
+      - run:
+          name: Authenticate with gcloud
+          command: |
             gcloud auth activate-service-account --key-file=/tmp/workspace/service-account-key.json
       - run:
-          name: Verify gcloud installation
+          name: Set project and region
           command: |
-            # Verify gcloud installation
-            gcloud version
+            gcloud config set project $PROJECT_ID
+            gcloud config set compute/region $GCP_REGION 
+            gcloud config set compute/zone $GCP_ZONE
+
 
 #   configure-infrastructure:
 #     docker:
