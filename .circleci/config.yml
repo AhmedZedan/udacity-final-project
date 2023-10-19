@@ -4,7 +4,7 @@ orbs:
   slack: circleci/slack@4.12.5
 
 commands:
-  notify_on_success:
+  notify_on_success_command:
     steps:
       - slack/notify:
           event: pass
@@ -16,17 +16,61 @@ commands:
           event: fail
           channel: C04TQUD2525
           template: basic_fail_1
-#   destroy-environment:
-#     description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
-#     parameters:
-#       # Add parameter here   
-#     steps:
-#       - run:
-#           name: Destroy environments
-#           when: on_fail
-#           command: |
-#             # Your code here
-#             exit 1
+  
+  install_terraform:
+    description: Install Terraform
+    steps:
+      - run:
+          name: Install Terraform
+          command: |
+            sudo apt-get update && sudo apt-get install -y gnupg software-properties-common
+            wget -O- https://apt.releases.hashicorp.com/gpg | \
+            gpg --dearmor | \
+            sudo tee /usr/share/keyrings/hashicorp-archive-keyring.gpg
+            gpg --no-default-keyring \
+            --keyring /usr/share/keyrings/hashicorp-archive-keyring.gpg \
+            --fingerprint
+            echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] \
+            https://apt.releases.hashicorp.com $(lsb_release -cs) main" | \
+            sudo tee /etc/apt/sources.list.d/hashicorp.list
+            sudo apt update
+            sudo apt-get install terraform
+
+  install_ansible:
+    description: Install Ansible
+    steps:
+      - run:
+          name: Install Ansible
+          command: |
+            sudo apt update
+            sudo apt upgrade
+            sudo apt install software-properties-common -y
+            sudo apt-add-repository --yes --update ppa:ansible/ansible
+            sudo apt install ansible -y
+  install_nodejs:
+    description: Install nodejs
+    steps:
+      - run:
+          name: Install nodejs
+          command: |
+            curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+
+
+  destroy-environment:
+    description: Destroy back-end and front-end cloudformation stacks given a workflow ID.
+    parameters:
+      Workflow_ID:
+        type: string
+        default: ${CIRCLE_WORKFLOW_ID:0:5}  
+    steps:
+      - run:
+          name: Destroy environments
+          when: on_fail
+          command: |
+            gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
+            terraform -chdir=.circleci/files/back-end destroy -auto-approve
+            terraform -chdir=.circleci/files/front-end destroy -var="ID=<<parameters.Workflow_ID>>" -auto-approve
 
 #   revert-migrations:
 #     description: Revert the last migration if successfully run in the current workflow.
@@ -148,43 +192,35 @@ jobs:
     docker:
       - image: cimg/base:stable
     steps:
-      - notify_on_success
+      - notify_on_success_command
 
+  deploy-infrastructure:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout 
+      - install_terraform
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            terraform -chdir=.circleci/files/back-end init
+            terraform -chdir=.circleci/files/back-end apply -auto-approve
 
-
-#   deploy-infrastructure:
-#     docker:
-#       # Docker image here that supports AWS CLI
-#     steps:
-#       # Checkout code from git
-#       - run:
-#           name: Ensure back-end infrastructure exists
-#           command: |
-#             aws cloudformation deploy \
-#               --template-file .circleci/files/backend.yml \
-#               #--tags project=your-tag \
-#               # --stack-name "your back-end stack name with workflow id" \
-#               # --parameter-overrides ID="your workflow id"  
-#               exit 1
-#       - run:
-#           name: Ensure front-end infrastructure exist
-#           command: |
-#             aws cloudformation deploy \
-#               --template-file .circleci/files/frontend.yml \
-#               #--tags project=your-tag \
-#               # --stack-name "your front-end stack name with workflow id" \
-#               # --parameter-overrides ID="your workflow id"  
-#               exit 1
-#       - run:
-#           name: Add back-end ip to ansible inventory
-#           command: |
-#             # Your code here
-#             exit 1
-#       - persist_to_workspace:
-#           root: ~/
-#           paths:
-#             - project/.circleci/ansible/inventory.txt
-#       # Here's where you will add some code to rollback on failure      
+      - run:
+          name: Ensure front-end infrastructure exist
+          command: |
+            terraform -chdir=.circleci/files/front-end init
+            terraform -chdir=.circleci/files/front-end apply -var="ID=${CIRCLE_WORKFLOW_ID:0:5}" -auto-approve 
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)' >> .circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
+      - destroy-environment
+      # Here's where you will add some code to rollback on failure      
 
 #   configure-infrastructure:
 #     docker:
@@ -337,11 +373,11 @@ workflows:
             - test-backend
             - scan-frontend
             - scan-backend
-      # - deploy-infrastructure:
-      #     requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #     filters:
-      #       branches:
-      #         only: [test-feature-branch]
+      - deploy-infrastructure:
+          requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [master]
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
       # - run-migrations:
