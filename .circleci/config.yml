@@ -240,10 +240,10 @@ jobs:
       - install_ansible
       - gcp-cli/setup:
           version: 404.0.0
-      # Add ssh keys with fingerprint
+      - add_ssh_keys:
+          fingerprints: ["ab:61:a7:bf:35:57:56:d6:6a:38:49:e0:bf:5e:16:20"]
       - attach_workspace:
           at: ~/
-
       - run:
           name: Run Configure Server Ansible play
           command: |
