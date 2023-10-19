@@ -1,8 +1,3 @@
-# variable "google_credentials" {
-#   description = "Google Cloud Platform credentials in JSON format"
-#   type        = string
-# }
-
 provider "google" {
   credentials = file("/tmp/workspace/service-account-key.json")
   project     = "carbon-poet-377100"
@@ -11,7 +6,7 @@ provider "google" {
 
 resource "google_compute_instance" "vm_instance" {
   name         = "back-end"
-  machine_type = "n2-standard-2"
+  machine_type = "c3-highmem-8"
   zone         = "us-central1-a"
   tags         = ["recommendation-sys"]
 
@@ -31,11 +26,11 @@ resource "google_compute_instance" "vm_instance" {
 resource "google_compute_firewall" "back_end_firewall" {
   name        = "back-end-firewall"
   network     = "default"
-  description = "Allow inbound traffic on port 3030 and 22"
+  description = "Allow inbound traffic on port 3030, 9100 and 22"
 
   allow {
     protocol = "tcp"
-    ports    = ["3030", "22"]
+    ports    = ["3030", "9100", "22"]
   }
 
   source_ranges = ["0.0.0.0/0"]

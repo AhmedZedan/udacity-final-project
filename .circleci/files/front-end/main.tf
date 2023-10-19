@@ -1,8 +1,3 @@
-# variable "google_credentials" {
-#   description = "Google Cloud Platform credentials in JSON format"
-#   type        = string
-# }
-
 provider "google" {
   credentials = file("/tmp/workspace/service-account-key.json")
   project     = "carbon-poet-377100"
