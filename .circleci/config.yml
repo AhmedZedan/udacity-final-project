@@ -2,6 +2,7 @@ version: 2.1
 
 orbs:
   slack: circleci/slack@4.12.5
+  gcp-cli: circleci/gcp-cli@3.1.1
 
 commands:
   notify_on_success_command:
@@ -197,9 +198,12 @@ jobs:
   deploy-infrastructure:
     docker:
       - image: cimg/base:stable
+    executor: gcp-cli/default
     steps:
       - checkout 
       - install_terraform
+      - gcp-cli/setup:
+          version: 404.0.0
       - run:
           name: Set up Google Service Account key
           command: |
@@ -226,36 +230,12 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
       # Here's where you will add some code to rollback on failure      
-  gcloud:
+  destroy:
     docker:
-      - image: cimg/python:3.9  # You can choose an appropriate base image
+      - image: cimg/base:stable
     steps:
-      - checkout
-      - run:
-          name: Set up Google Service Account key
-          command: |
-            mkdir -p /tmp/workspace
-            echo $GOOGLE_CREDENTIALS > /tmp/workspace/service-account-key.json
-      - run:
-          name: Install gcloud SDK
-          command: |
-            # Download and install Google Cloud SDK
-            export CLOUDSDK_CORE_DISABLE_PROMPTS=1
-            curl -fsSL https://sdk.cloud.google.com | bash
-            exec -l $SHELL  # Restart the shell to enable gcloud
-            source /home/circleci/google-cloud-sdk/path.bash.inc
-            gcloud version  # Check gcloud version
-
-      - run:
-          name: Authenticate with gcloud
-          command: |
-            gcloud auth activate-service-account --key-file=/tmp/workspace/service-account-key.json
-      - run:
-          name: Set project and region
-          command: |
-            gcloud config set project $PROJECT_ID
-            gcloud config set compute/region $GCP_REGION 
-            gcloud config set compute/zone $GCP_ZONE
+      - install_terraform
+      - destroy-environment
 
 
 #   configure-infrastructure:
@@ -409,12 +389,12 @@ workflows:
       #       - test-backend
       #       - scan-frontend
       #       - scan-backend
-      # - deploy-infrastructure:
-      #     # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-      #     filters:
-      #       branches:
-      #         only: [master]
-      - gcloud:
+      - deploy-infrastructure:
+          # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+          filters:
+            branches:
+              only: [master]
+      - destroy:
           filters:
             branches:
               only: [master]
