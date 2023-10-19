@@ -229,13 +229,7 @@ jobs:
           paths:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
-      # Here's where you will add some code to rollback on failure      
-  destroy:
-    docker:
-      - image: cimg/base:stable
-    steps:
-      - install_terraform
-      - destroy-environment
+      # Here's where you will add some code to rollback on failure
 
 
 #   configure-infrastructure:
@@ -391,10 +385,6 @@ workflows:
       #       - scan-backend
       - deploy-infrastructure:
           # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches:
-              only: [master]
-      - destroy:
           filters:
             branches:
               only: [master]
