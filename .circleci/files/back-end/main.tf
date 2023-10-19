@@ -1,5 +1,10 @@
+variable "google_credentials" {
+  description = "Google Cloud Platform credentials in JSON format"
+  type        = string
+}
+
 provider "google" {
-  credentials = file("/Users/Zedan/carbon-poet-377100-3ec7ee9b8da0.json")
+  credentials = jsondecode(var.google_credentials)
   project     = "carbon-poet-377100"
   region      = "us-central1"
 }
