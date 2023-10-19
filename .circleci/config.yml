@@ -243,6 +243,7 @@ jobs:
             export CLOUDSDK_CORE_DISABLE_PROMPTS=1
             curl -fsSL https://sdk.cloud.google.com | bash
             exec -l $SHELL  # Restart the shell to enable gcloud
+            source $HOME/google-cloud-sdk/path.bash.inc
             gcloud version  # Check gcloud version
 
       - run:
