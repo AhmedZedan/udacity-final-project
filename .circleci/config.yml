@@ -67,7 +67,7 @@ commands:
     steps:
       - run:
           name: Destroy environments
-          when: on_fail
+          # when: on_fail
           command: |
             # gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
             terraform -chdir=.circleci/files/back-end destroy  -auto-approve
@@ -224,13 +224,20 @@ jobs:
           name: Add back-end ip to ansible inventory
           command: |
             gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)' >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
       - persist_to_workspace:
           root: ~/
           paths:
             - project/.circleci/ansible/inventory.txt
-      - destroy-environment
+      # - destroy-environment
       # Here's where you will add some code to rollback on failure
 
+  destroy:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - install_terraform
+      - destroy-environment
 
 #   configure-infrastructure:
 #     docker:
@@ -388,6 +395,11 @@ workflows:
           filters:
             branches:
               only: [master]
+      - destroy:
+          filters:
+            branches:
+              only: [master]
+
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
       # - run-migrations:
