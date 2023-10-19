@@ -70,8 +70,8 @@ commands:
           # when: on_fail
           command: |
             # gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
-            terraform -chdir=./files/back-end destroy  -auto-approve
-            terraform -chdir=./files/front-end destroy -var="ID=<<parameters.Workflow_ID>>" -auto-approve
+            terraform -chdir=.circleci/files/back-end destroy  -auto-approve
+            terraform -chdir=.circleci/files/front-end destroy -var="ID=<<parameters.Workflow_ID>>" -auto-approve
 
 #   revert-migrations:
 #     description: Revert the last migration if successfully run in the current workflow.
