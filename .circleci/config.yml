@@ -396,6 +396,8 @@ workflows:
             branches:
               only: [master]
       - destroy:
+          requires:
+            - deploy-infrastructure
           filters:
             branches:
               only: [master]
