@@ -69,8 +69,8 @@ commands:
           when: on_fail
           command: |
             # gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
-            terraform -chdir=.circleci/files/back-end destroy -var="google_credentials=$GOOGLE_CREDENTIALS" -auto-approve
-            terraform -chdir=.circleci/files/front-end destroy -var="google_credentials=$GOOGLE_CREDENTIALS" -var="ID=<<parameters.Workflow_ID>>" -auto-approve
+            terraform -chdir=.circleci/files/back-end destroy  -auto-approve
+            terraform -chdir=.circleci/files/front-end destroy -var="ID=<<parameters.Workflow_ID>>" -auto-approve
 
 #   revert-migrations:
 #     description: Revert the last migration if successfully run in the current workflow.
@@ -226,12 +226,32 @@ jobs:
             - project/.circleci/ansible/inventory.txt
       - destroy-environment
       # Here's where you will add some code to rollback on failure      
-  destroy:
+  gcloud:
     docker:
-      - image: cimg/base:stable
+      - image: circleci/python:3.10  # You can choose an appropriate base image
     steps:
-      - install_terraform
-      - destroy-environment
+      - checkout
+      - run:
+          name: Set up Google Service Account key
+          command: |
+            mkdir -p /tmp/workspace
+            echo $GOOGLE_CREDENTIALS > /tmp/workspace/service-account-key.json
+      - run:
+          name: Install gcloud SDK
+          command: |
+            # Download and install Google Cloud SDK
+            export CLOUDSDK_CORE_DISABLE_PROMPTS=1
+            curl -fsSL https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-360.0.0-linux-x86_64.tar.gz | tar -zx
+            ./google-cloud-sdk/install.sh
+            source $HOME/google-cloud-sdk/path.bash.inc
+
+            # Authenticate using a service account key
+            gcloud auth activate-service-account --key-file=/tmp/workspace/service-account-key.json
+      - run:
+          name: Verify gcloud installation
+          command: |
+            # Verify gcloud installation
+            gcloud version
 
 #   configure-infrastructure:
 #     docker:
@@ -389,7 +409,10 @@ workflows:
       #     filters:
       #       branches:
       #         only: [master]
-      - destroy
+      - gcloud:
+          filters:
+            branches:
+              only: [master]
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
       # - run-migrations:
