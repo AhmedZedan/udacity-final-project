@@ -29,7 +29,7 @@ resource "google_compute_instance" "vm_instance" {
 }
 
 resource "google_compute_firewall" "back_end_firewall" {
-  name        = "back_end_firewall"
+  name        = "back-end-firewall"
   network     = "default"
   description = "Allow inbound traffic on port 3030 and 22"
 
