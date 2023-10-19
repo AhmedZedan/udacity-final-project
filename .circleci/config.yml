@@ -208,7 +208,7 @@ jobs:
           name: Set up Google Service Account key
           command: |
             mkdir -p /tmp/workspace
-            echo $GOOGLE_CREDENTIALS > /tmp/workspace/service-account-key.json
+            echo $GCLOUD_SERVICE_KEY > /tmp/workspace/service-account-key.json
       - run:
           name: Ensure back-end infrastructure exists
           command: |
