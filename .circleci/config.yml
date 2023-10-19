@@ -228,7 +228,7 @@ jobs:
       # Here's where you will add some code to rollback on failure      
   gcloud:
     docker:
-      - image: circleci/python:3.10  # You can choose an appropriate base image
+      - image: cimg/python:3.9  # You can choose an appropriate base image
     steps:
       - checkout
       - run:
