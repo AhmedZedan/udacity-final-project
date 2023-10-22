@@ -239,6 +239,7 @@ jobs:
     steps:
       - checkout
       - install_ansible
+      - install_terraform
       - gcp-cli/setup:
           version: 404.0.0
       - add_ssh_keys:
@@ -259,6 +260,7 @@ jobs:
       - image: cimg/node:13.8.0
     steps:
       - checkout
+      - install_terraform
       - gcp-cli/setup:
           version: 404.0.0
       - run:
@@ -269,7 +271,7 @@ jobs:
             npm install
             npm audit fix
             npm audit fix --force --audit-level=critical
-            # npm run premigrations
+            npm run premigrations
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt 
       - run:
