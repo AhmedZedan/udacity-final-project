@@ -70,7 +70,9 @@ commands:
           when: on_fail
           command: |
             # gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
+            terraform -chdir=.circleci/files/back-end init
             terraform -chdir=.circleci/files/back-end destroy  -auto-approve
+            terraform -chdir=.circleci/files/front-end init
             terraform -chdir=.circleci/files/front-end destroy -var="ID=<<parameters.Workflow_ID>>" -auto-approve
 
   revert-migrations:
@@ -269,6 +271,7 @@ jobs:
             export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
             cd backend
             npm install
+            npm install typeorm@latest
             npm audit fix
             npm audit fix --force --audit-level=critical
             npm run premigrations
