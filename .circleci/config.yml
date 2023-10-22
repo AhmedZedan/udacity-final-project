@@ -266,15 +266,20 @@ jobs:
       - gcp-cli/setup:
           version: 404.0.0
       - run:
+          name: Set up Google Service Account key
+          command: |
+            mkdir -p /tmp/workspace
+            echo $GCLOUD_SERVICE_KEY > /tmp/workspace/service-account-key.json
+      - run:
           name: Run migrations
           command: |
             export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
             cd backend
             npm install
-            npm install typeorm@latest
             npm audit fix
             npm audit fix --force --audit-level=critical
             npm run premigrations
+            npm install typeorm@latest
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt 
       - run:
