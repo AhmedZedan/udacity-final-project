@@ -30,7 +30,7 @@ resource "google_compute_firewall" "back_end_firewall" {
 
   allow {
     protocol = "tcp"
-    ports    = ["3030", "9100", "22"]
+    ports    = ["3030", "5532", "9100", "22"]
   }
 
   source_ranges = ["0.0.0.0/0"]
