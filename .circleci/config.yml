@@ -266,7 +266,7 @@ jobs:
       - run:
           name: Run migrations
           command: |
-            # export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+            export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
             cd backend
             npm install
             npm audit fix
