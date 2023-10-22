@@ -69,7 +69,7 @@ commands:
           name: Destroy environments
           when: on_fail
           command: |
-            gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
+            # gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
             terraform -chdir=.circleci/files/back-end destroy  -auto-approve
             terraform -chdir=.circleci/files/front-end destroy -var="ID=<<parameters.Workflow_ID>>" -auto-approve
 
@@ -267,6 +267,7 @@ jobs:
             # export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
             cd backend
             npm install
+            npm audit fix
             npm audit fix --force --audit-level=critical
             # npm run premigrations
             npm run migrations > migrations_dump.txt
