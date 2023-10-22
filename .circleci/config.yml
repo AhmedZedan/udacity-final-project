@@ -267,6 +267,7 @@ jobs:
             # export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
             cd backend
             npm install
+            npm audit fix --force --audit-level=critical
             # npm run premigrations
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt 
