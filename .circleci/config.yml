@@ -71,10 +71,8 @@ commands:
           command: |
             # gsutil -m rm -a gs://udapeople-<<parameters.Workflow_ID>>/**
             terraform -chdir=.circleci/files/back-end init
-            terraform workspace select backend_workspace
             terraform -chdir=.circleci/files/back-end destroy  -auto-approve
             terraform -chdir=.circleci/files/front-end init
-            terraform workspace select frontend_workspace
             terraform -chdir=.circleci/files/front-end destroy -var="ID=<<parameters.Workflow_ID>>" -auto-approve
 
   revert-migrations:
@@ -218,14 +216,12 @@ jobs:
           name: Ensure back-end infrastructure exists
           command: |
             terraform -chdir=.circleci/files/back-end init
-            terraform workspace new backend_workspace
             terraform -chdir=.circleci/files/back-end apply -auto-approve
 
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             terraform -chdir=.circleci/files/front-end init
-            terraform workspace new frontend_workspace
             terraform -chdir=.circleci/files/front-end apply -var="ID=${CIRCLE_WORKFLOW_ID:0:5}" -auto-approve 
       - run:
           name: Add back-end ip to ansible inventory
@@ -277,13 +273,13 @@ jobs:
       - run:
           name: Run migrations
           command: |
-            export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+            # export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
             cd backend
             npm install
-            npm audit fix
-            npm audit fix --force --audit-level=critical
-            npm run premigrations
-            npm install typeorm@latest
+            # npm audit fix
+            # npm audit fix --force --audit-level=critical
+            # npm run premigrations
+            # npm install typeorm@latest
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt 
       - run:
