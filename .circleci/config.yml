@@ -315,7 +315,7 @@ jobs:
                     
   deploy-backend:
     docker:
-      - image: cimg/node:13.8.0
+      - image: cimg/base:stable
     steps:
       - checkout
       - install_ansible
@@ -325,11 +325,6 @@ jobs:
       - add_ssh_keys:
           fingerprints: ["ab:61:a7:bf:35:57:56:d6:6a:38:49:e0:bf:5e:16:20"]
       - run:
-          name: Install dependencies
-          command: |
-            cd backend
-            npm install
-      - run:
           name: Deploy backend
           command: |
             export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
@@ -337,6 +332,7 @@ jobs:
             echo $TYPEORM_HOST >> .circleci/ansible/inventory.txt
 
             cd backend
+            npm install
             npm run build
             echo "TYPEORM_ENTITIES=./dist/modules/domain/**/*.entity{.ts,.js}" > .env
             echo "TYPEORM_HOST=${TYPEORM_HOST}" >> .env
