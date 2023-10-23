@@ -275,8 +275,8 @@ jobs:
             echo " here is the server ip $TYPEORM_HOST"
             cd backend
             npm install
-            npm audit fix
-            npm audit fix --force --audit-level=critical
+            # npm audit fix
+            # npm audit fix --force --audit-level=critical
             # npm run premigrations
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt 
