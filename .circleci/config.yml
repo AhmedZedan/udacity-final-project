@@ -316,9 +316,13 @@ jobs:
       - run:
           name: Deploy frontend objects
           command: |
+            export BACKEND_PUBLIC_IP=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+            echo "API_URL=http://$BACKEND_PUBLIC_IP:3030" 
             cd frontend
-            echo "now for deploy"
-            ls -a
+            echo "API_URL=http://$BACKEND_PUBLIC_IP:3030" > .env
+            ls -al
+            ca .env
+            npm install
             npm run build:prod
             gsutil cp -r dist/* gs://udapeople-${CIRCLE_WORKFLOW_ID:0:5}
       # Here's where you will add some code to rollback on failure      
