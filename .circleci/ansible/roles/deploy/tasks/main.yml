@@ -1,0 +1,23 @@
+- name: Create Backend Directory
+  file:
+    path: /home/zedan/backend
+    state: directory
+
+- copy:
+    src: ~/project/.circleci/ansible/roles/deploy/artifact.tar.gz
+    dest: /home/zedan/backend
+
+- name: Extract artifact.tar.gz to EC2 
+  unarchive:
+    src: artifact.tar.gz
+    dest: /home/zedan/backend
+
+- name: "Installing Node Dependencies"
+  shell: |
+    cd /home/zedan/backend
+    npm i
+- name: Start the app
+  shell: |
+    cd backend
+    node dist/main.js &
+    sudo pm2 start -f /home/zedan/backend/dist/main.js

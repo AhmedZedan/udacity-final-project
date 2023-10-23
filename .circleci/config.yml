@@ -54,7 +54,7 @@ commands:
       - run:
           name: Install nodejs
           command: |
-            curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+            curl -fsSL https://deb.nodesource.com/setup_13.x | sudo -E bash -
             sudo apt-get install -y nodejs
 
 
@@ -289,7 +289,6 @@ jobs:
             else
               echo "No migrations are pending" 
             fi
-     # Here's where you will add some code to rollback on failure   
       - destroy-environment
       - revert-migrations   
 
@@ -314,22 +313,45 @@ jobs:
 #             # your code here
 #       # Here's where you will add some code to rollback on failure      
                     
-#   deploy-backend:
-#     docker:
-#       # Docker image here that supports Ansible
-#     steps:
-#       # Checkout code from git
-#       # Add ssh keys with fingerprint
-#       # attach workspace
-#       - run:
-#           name: Install dependencies
-#           command: |
-#             # your code here
-#       - run:
-#           name: Deploy backend
-#           command: |
-#             # your code here
-#       # Here's where you will add some code to rollback on failure  
+  deploy-backend:
+    docker:
+      - image: cimg/node:13.8.0
+    steps:
+      - checkout
+      - install_ansible
+      - install_terraform
+      - gcp-cli/setup:
+          version: 404.0.0
+      - add_ssh_keys:
+          fingerprints: ["ab:61:a7:bf:35:57:56:d6:6a:38:49:e0:bf:5e:16:20"]
+      - run:
+          name: Install dependencies
+          command: |
+            cd backend
+            npm install
+      - run:
+          name: Deploy backend
+          command: |
+            export TYPEORM_HOST=$(gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)')
+            echo $TYPEORM_HOST
+            echo $TYPEORM_HOST >> .circleci/ansible/inventory.txt
+
+            cd backend
+            npm run build
+            echo "TYPEORM_ENTITIES=./dist/modules/domain/**/*.entity{.ts,.js}" > .env
+            echo "TYPEORM_HOST=${TYPEORM_HOST}" >> .env
+            echo "TYPEORM_PORT=${TYPEORM_PORT}" >> .env
+            echo "TYPEORM_USERNAME=${TYPEORM_USERNAME}" >> .env
+            echo "TYPEORM_PASSWORD=${TYPEORM_PASSWORD}" >> .env
+            echo "TYPEORM_DATABASE=${TYPEORM_DATABASE}" >> .env
+            echo "TYPEORM_MIGRATIONS_DIR=./dist/migrations" >> .env
+            echo "TYPEORM_MIGRATIONS=./dist/migrations/*.ts" >> .env
+            tar -czf artifact.tar.gz dist/* package* .env
+            cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/artifact.tar.gz
+            ls ../.circleci/ansible/roles/deploy/
+            cd ../.circleci/ansible
+            ansible-playbook -i inventory.txt deploy-backend.yml
+      # Here's where you will add some code to rollback on failure  
 
 #   smoke-test:
 #     docker:
@@ -416,11 +438,11 @@ workflows:
 
       # - configure-infrastructure:
       #     requires: [deploy-infrastructure]
-      - run-migrations
+      # - run-migrations:
       #     requires: [configure-infrastructure]
       # - deploy-frontend:
       #     requires: [run-migrations]
-      # - deploy-backend:
+      - deploy-backend
       #     requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
