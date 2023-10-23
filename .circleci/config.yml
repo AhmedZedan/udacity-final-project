@@ -277,7 +277,7 @@ jobs:
             npm install
             npm audit fix
             npm audit fix --force --audit-level=critical
-            npm run premigrations
+            # npm run premigrations
             npm run migrations > migrations_dump.txt
             cat migrations_dump.txt 
       - run:
