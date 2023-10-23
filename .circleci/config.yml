@@ -320,6 +320,7 @@ jobs:
       - checkout
       - install_ansible
       - install_terraform
+      - install_nodejs
       - gcp-cli/setup:
           version: 404.0.0
       - add_ssh_keys:
