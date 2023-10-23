@@ -321,7 +321,7 @@ jobs:
             cd frontend
             echo "API_URL=http://$BACKEND_PUBLIC_IP:3030" > .env
             ls -al
-            ca .env
+            cat .env
             npm install
             npm run build:prod
             gsutil cp -r dist/* gs://udapeople-${CIRCLE_WORKFLOW_ID:0:5}
