@@ -210,26 +210,26 @@ jobs:
           command: |
             mkdir -p /tmp/workspace
             echo $GCLOUD_SERVICE_KEY > /tmp/workspace/service-account-key.json
-      # - run:
-      #     name: Ensure back-end infrastructure exists
-      #     command: |
-      #       terraform -chdir=.circleci/files/back-end init
-      #       terraform -chdir=.circleci/files/back-end apply -auto-approve
+      - run:
+          name: Ensure back-end infrastructure exists
+          command: |
+            terraform -chdir=.circleci/files/back-end init
+            terraform -chdir=.circleci/files/back-end apply -auto-approve
 
       - run:
           name: Ensure front-end infrastructure exist
           command: |
             terraform -chdir=.circleci/files/front-end init
             terraform -chdir=.circleci/files/front-end apply -var="ID=${CIRCLE_WORKFLOW_ID:0:5}" -auto-approve 
-      # - run:
-      #     name: Add back-end ip to ansible inventory
-      #     command: |
-      #       gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)' >> .circleci/ansible/inventory.txt
-      #       cat .circleci/ansible/inventory.txt
-      # - persist_to_workspace:
-      #     root: ~/
-      #     paths:
-      #       - project/.circleci/ansible/inventory.txt
+      - run:
+          name: Add back-end ip to ansible inventory
+          command: |
+            gcloud compute instances describe back-end --format='get(networkInterfaces[0].accessConfigs[0].natIP)' >> .circleci/ansible/inventory.txt
+            cat .circleci/ansible/inventory.txt
+      - persist_to_workspace:
+          root: ~/
+          paths:
+            - project/.circleci/ansible/inventory.txt
       - destroy-environment
 
   configure-infrastructure:
@@ -275,10 +275,9 @@ jobs:
             echo " here is the server ip $TYPEORM_HOST"
             cd backend
             npm install
-            # npm audit fix
-            # npm audit fix --force --audit-level=critical
             npm run premigrations
             npm run migrations > migrations_dump.txt
+            echo ################################
             cat migrations_dump.txt 
       - run:
           name: Send migration results to memstash
@@ -447,13 +446,13 @@ workflows:
             branches:
               only: [master]
 
-      # - configure-infrastructure:
-      #     requires: [deploy-infrastructure]
-      # - run-migrations:
-      #     requires: [configure-infrastructure]
-      - deploy-frontend:
+      - configure-infrastructure:
           requires: [deploy-infrastructure]
-      #     requires: [run-migrations]
+      - run-migrations:
+          requires: [configure-infrastructure]
+      - deploy-frontend:
+          # requires: [deploy-infrastructure]
+          requires: [run-migrations]
       # - deploy-backend:
       #     requires: [run-migrations]
       # - smoke-test:
