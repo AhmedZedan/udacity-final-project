@@ -312,12 +312,15 @@ jobs:
             echo "API_URL=http://$BACKEND_PUBLIC_IP:3030" 
             cd frontend
             echo "API_URL=http://$BACKEND_PUBLIC_IP:3030" > .env
+            ls
       - run:
           name: Deploy frontend objects
           command: |
             cd frontend
+            echo "now for deploy"
+            ls
             npm run build:prod
-            gsutil cp -r dist gs://udapeople-${CIRCLE_WORKFLOW_ID:0:5}
+            gsutil cp -r dist/* gs://udapeople-${CIRCLE_WORKFLOW_ID:0:5}
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
