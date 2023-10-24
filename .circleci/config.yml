@@ -323,7 +323,7 @@ jobs:
             cat .env
             npm install
             npm run build:prod
-            gsutil cp -r dist/* gs://udapeople-${CIRCLE_WORKFLOW_ID:0:5}
+            gsutil cp -r dist gs://udapeople-${CIRCLE_WORKFLOW_ID:0:5}
       # Here's where you will add some code to rollback on failure      
                     
   deploy-backend:
