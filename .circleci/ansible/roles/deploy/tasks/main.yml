@@ -17,21 +17,13 @@
     cd /home/zedan/backend
     npm i
 
-- name: "Executing Node app with PM2"
+- name: Start the app
   shell: |
-    cd /home/zedan/backend/dist
-    pm2 stop default
-    pm2 start main.js
-
+    cd backend
+    node dist/main.js &
+    sudo pm2 start -f /home/zedan/backend/dist/main.js
   register: execute_node
 
 - name: print message
   debug:
     msg: "{{ execute_node.stdout_lines }}"
-
-
-# - name: Start the app
-#   shell: |
-#     cd backend
-#     node dist/main.js &
-#     sudo pm2 start -f /home/zedan/backend/dist/main.js

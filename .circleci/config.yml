@@ -348,18 +348,15 @@ jobs:
             cd backend
             npm install
             npm run build
-            # echo "TYPEORM_ENTITIES=./dist/modules/domain/**/*.entity{.ts,.js}" > .env
-            # echo "TYPEORM_HOST=${TYPEORM_HOST}" >> .env
-            # echo "TYPEORM_PORT=${TYPEORM_PORT}" >> .env
-            # echo "TYPEORM_USERNAME=${TYPEORM_USERNAME}" >> .env
-            # echo "TYPEORM_PASSWORD=${TYPEORM_PASSWORD}" >> .env
-            # echo "TYPEORM_DATABASE=${TYPEORM_DATABASE}" >> .env
-            # echo "TYPEORM_MIGRATIONS_DIR=./dist/migrations" >> .env
-            # echo "TYPEORM_MIGRATIONS=./dist/migrations/*{.ts,.ts}" >> .env
 
-            export TYPEORM_MIGRATIONS_DIR=./dist/migrations
-            export TYPEORM_MIGRATIONS=./dist/migrations/*.ts
-            export TYPEORM_ENTITIES=./dist/modules/domain/**/*.entity{.ts,.js}
+            echo "TYPEORM_ENTITIES=./dist/modules/domain/**/*.entity{.ts,.js}" > .env
+            echo "TYPEORM_HOST=${TYPEORM_HOST}" >> .env
+            echo "TYPEORM_PORT=${TYPEORM_PORT}" >> .env
+            echo "TYPEORM_USERNAME=${TYPEORM_USERNAME}" >> .env
+            echo "TYPEORM_PASSWORD=${TYPEORM_PASSWORD}" >> .env
+            echo "TYPEORM_DATABASE=${TYPEORM_DATABASE}" >> .env
+            echo "TYPEORM_MIGRATIONS_DIR=./dist/migrations" >> .env
+            echo "TYPEORM_MIGRATIONS=./dist/migrations/*.ts" >> .env
 
             tar -czf artifact.tar.gz dist/* package*
             cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/artifact.tar.gz
@@ -445,20 +442,19 @@ workflows:
       #       - test-backend
       #       - scan-frontend
       #       - scan-backend
-      - deploy-infrastructure:
-          # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
-          filters:
-            branches:
-              only: [master]
-
-      - configure-infrastructure:
-          requires: [deploy-infrastructure]
-      - run-migrations:
-          requires: [configure-infrastructure]
-      - deploy-frontend:
-          requires: [run-migrations]
-      - deploy-backend:
-          requires: [run-migrations]
+      # - deploy-infrastructure:
+      #     # requires: [test-frontend, test-backend, scan-frontend, scan-backend]
+      #     filters:
+      #       branches:
+      #         only: [master]
+      # - configure-infrastructure:
+      #     requires: [deploy-infrastructure]
+      # - run-migrations:
+      #     requires: [configure-infrastructure]
+      # - deploy-frontend:
+      #     requires: [run-migrations]
+      - deploy-backend
+          # requires: [run-migrations]
       # - smoke-test:
       #     requires: [deploy-backend, deploy-frontend]
       # - cloudfront-update:
