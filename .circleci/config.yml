@@ -355,7 +355,7 @@ jobs:
             echo "TYPEORM_PASSWORD=${TYPEORM_PASSWORD}" >> .env
             echo "TYPEORM_DATABASE=${TYPEORM_DATABASE}" >> .env
             echo "TYPEORM_MIGRATIONS_DIR=./dist/migrations" >> .env
-            echo "TYPEORM_MIGRATIONS=./dist/migrations/*.ts" >> .env
+            echo "TYPEORM_MIGRATIONS=./dist/migrations/*{.ts,.ts}" >> .env
             tar -czf artifact.tar.gz dist/* package* .env
             cp artifact.tar.gz ~/project/.circleci/ansible/roles/deploy/artifact.tar.gz
             ls ../.circleci/ansible/roles/deploy/
