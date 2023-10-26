@@ -19,7 +19,7 @@
 
 - name: "Executing Node app with PM2"
   shell: |
-    cd ~/backend-app/dist
+    cd /home/zedan/backend/dist
     pm2 stop default
     pm2 start main.js
 
@@ -28,7 +28,7 @@
 - name: print message
   debug:
     msg: "{{ execute_node.stdout_lines }}"
-    
+
 
 # - name: Start the app
 #   shell: |
